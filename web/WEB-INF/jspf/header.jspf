@@ -1,0 +1,53 @@
+<%-- any content can be specified here e.g.: --%>
+<%@page import="controleAcesso.User"%>
+<%@page import="controleAcesso.Cont" %>
+<%@page import="controleAcesso.Database"%>
+<%@ page pageEncoding="UTF-8" %>
+
+<%
+    String error = null;
+if(request.getParameter("session.login") != null){
+    User user = Database.getUser(request.getParameter("session.email"));
+    if(user != null){
+        String password = request.getParameter("session.password");
+        if(user.getPasswordHash() == password.hashCode()){
+            session.setAttribute("session.name", user.getName());
+            session.setAttribute("session.email", user.getEmail()); 
+            response.sendRedirect(request.getRequestURI());
+        }else{
+           error = "erro ao acessar o login! por favor digite corretamente 2";
+          
+        }
+    }else{
+        error = "erro ao acessar o login! por favor digite corretamente 1";
+  
+    }
+} else if(request.getParameter("session.logout") != null){
+    session.removeAttribute("session.name");
+    session.removeAttribute("session.email");
+}
+%>
+<% if (session.getAttribute("session.name") == null) { %>
+<h2>Controle de login</h2>
+<%if(error != null){%>
+<div style="color: red"><%= error%></div>  
+<%}%>
+<form method="POST" >
+    Email: <input type="text" name="session.email"/>
+    Senha: <input type="password" name="session.password" />
+    <input type="submit" name="session.login" value="Entrar"/>
+</form> 
+<%} else{ %>
+Bem vindo, <b><%= session.getAttribute("session.name")%></b><br/>
+<form>
+    <input type="submit" name="session.logout" value="Sair" />
+    | <a href="index.jsp">HOME</a>
+    | <a href="contato.jsp">CONTATOS</a>
+    <%if(session.getAttribute("session.name").equals("Administrador")){%>
+    | <a href="usuarios.jsp">USUARIOS</a>   
+    <%}%>
+</form>
+<hr>
+            
+    
+<%}%>
